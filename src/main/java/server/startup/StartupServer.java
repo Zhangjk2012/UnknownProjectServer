@@ -19,6 +19,10 @@ public class StartupServer {
     private EventLoopGroup bossGroup = new NioEventLoopGroup();
     private EventLoopGroup workerGroup = new NioEventLoopGroup();
 
+    public StartupServer(int port) {
+        this.port = port;
+    }
+
     public void start() throws Exception {
         try {
             ServerBootstrap b = new ServerBootstrap();
@@ -31,8 +35,8 @@ public class StartupServer {
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)
+                    .option(ChannelOption.TCP_NODELAY,true)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
-
             ChannelFuture f = b.bind(port).sync();
             f.channel().closeFuture().sync();
         } finally {
@@ -41,6 +45,10 @@ public class StartupServer {
         }
     }
 
+    public static void main(String[] args) throws Exception {
+        StartupServer ss = new StartupServer(8080);
+        ss.start();
+    }
 
 
 }

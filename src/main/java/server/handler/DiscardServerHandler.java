@@ -1,7 +1,14 @@
 package server.handler;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
+import io.netty.util.ReferenceCountUtil;
+
+import java.util.Date;
 
 /**
  * Created by zjk on 04/07/16.
@@ -10,12 +17,24 @@ public class DiscardServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        super.channelActive(ctx);
+        System.out.println(ctx.getClass().toString());
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        super.channelRead(ctx, msg);
+        ByteBuf in= (ByteBuf) msg;
+        byte[] buf = new byte[in.readableBytes()];
+        in.readBytes(buf);
+        String body = new String(buf,"UTF-8");
+        System.out.println("receive body=========:"+body);
+        Date d = new Date();
+        ByteBuf b = Unpooled.copiedBuffer(d.toString().getBytes());
+//        ChannelFuture cf = ctx.write(b);
+    }
+
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        ctx.flush();
     }
 
     @Override
@@ -25,7 +44,7 @@ public class DiscardServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        super.exceptionCaught(ctx, cause);
+        ctx.close();
     }
 
     @Override
